@@ -37,7 +37,7 @@ along with this program.  If not, see < http://www.gnu.org/licenses/ >.
             this._stringBundle = stringBundle;
         },
         get: function(){
-            if(_.isArray(arguments[1])){
+            if(typeof(arguments[1]) !== 'string'){
                return this.format(this.get(arguments[0]), arguments[1]);
             }
             var key = this._stringBundle[arguments[0]];
