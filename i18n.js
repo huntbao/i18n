@@ -54,12 +54,13 @@ along with this program.  If not, see < http://www.gnu.org/licenses/ >.
             return messages;
         },
         format: function(str, arr){
-            var strArr = str.split('\\$');
-            for(var i = 0, l = arr.length, regExp; i < l; i++){
+            var strArr = str.split('\\$'),
+            strArrLen = strArr.length;
+            for(var i = 0, l = arr.length, regExp, j; i < l; i++){
                 regExp = new RegExp('\\$' + i, 'g');
-                _.each(strArr, function(s, idx){
-                    strArr[idx] = s.replace(regExp, arr[i]); 
-                });
+                for(j = 0; j < strArrLen; j++){
+                    strArr[j] = strArr[j].replace(regExp, arr[j]);
+                }
             }
             return strArr.join('\$');
         }
