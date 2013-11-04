@@ -29,49 +29,60 @@ You should have received a copy of the Lesser GNU General Public License
 along with this program.  If not, see < http://www.gnu.org/licenses/ >.
 
 */
-(function(){
-    'use strict';
+(function ($) {
     var i18n = {
-        _stringBundle: {},
-        setStringBundle: function(stringBundle){
-            this._stringBundle = stringBundle;
-        },
-        get: function(){
-            if(typeof(arguments[1]) !== 'string'){
-               return this.format(this.get(arguments[0]), arguments[1]);
+        __messageBundle: {},
+        
+        get: function () {
+            if ($.isArray(arguments[1])) {
+                return i18n.__format(this.get(arguments[0]), arguments[1]);
             }
-            var key = this._stringBundle[arguments[0]];
+            var key = i18n.__messageBundle[arguments[0]];
             return key ? key.message : arguments[0];
         },
-        getMessage: function(){
-           return this.get.apply(this, arguments);
+
+        getMessage: function () {
+            return this.get.apply(this, arguments);
         },
-        getMessages: function(keyArr){
+
+        getMessages: function (keyArr) {
+            if (!$.isArray(keyArr)) return;
             var messages = [];
-            for(var i = 0, l = keyArr.length; i < l; i++){
+            for (var i = 0, l = keyArr.length; i < l; i++) {
                 messages.push(this.get(keyArr[i]));
             }
             return messages;
         },
-        format: function(str, arr){
-            var strArr = str.split('\\$'),
-            strArrLen = strArr.length;
-            for(var i = 0, l = arr.length, regExp, j; i < l; i++){
+
+        setMessageBundle: function (moduleMessageBundle, messageBundle, moduleNamespace) {
+            if (!messageBundle || !moduleNamespace) {
+                $.error('Both messages bundle and module namespace are required.');
+                return;
+            }
+            var __moduleNamespace = '__module__' + moduleNamespace;
+            if (messageBundle[__moduleNamespace]) {
+                $.error('Module<' + moduleNamespace + '> has already existed.');
+                return;
+            }
+            messageBundle[__moduleNamespace] = true;
+            for (var p in moduleMessageBundle) {
+                messageBundle[moduleNamespace + '.' + p] = moduleMessageBundle[p];
+            }
+            i18n.__messageBundle = messageBundle;
+        },
+
+        __format: function (str, arr) {
+            var strArr = str.split('\\$');
+            for (var i = 0, l = arr.length, regExp; i < l; i++) {
                 regExp = new RegExp('\\$' + i, 'g');
-                for(j = 0; j < strArrLen; j++){
-                    strArr[j] = strArr[j].replace(regExp, arr[j]);
-                }
+                $.each(strArr, function (s, idx) {
+                    strArr[idx] = s.replace(regExp, arr[i]);
+                });
             }
             return strArr.join('\$');
         }
     }
-    if(typeof module != 'undefined' && typeof module != 'function'){
-        module.exports = i18n;
-    }else if(typeof define === 'function' && define.amd){
-        define(i18n);
-    }else if{typeof jQuery !== 'undefined' && typeof jQuery.i18n === 'undefined'}{
-        jQuery.i18n = i18n;
-    }else if(typeof this.i18n === 'undefined'){
-        this.i18n = i18n;
-    }
-})();
+
+    // export public method
+    $.i18n = $;
+})(jQuery);
